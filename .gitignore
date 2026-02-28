@@ -1,0 +1,12 @@
+# .gitignore
+build/
+out/
+.cache/
+.vscode/
+.idea/
+*.o
+*.a
+*.so
+*.dylib
+*.dll
+*.exe
