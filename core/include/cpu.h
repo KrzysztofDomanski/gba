@@ -1,6 +1,7 @@
 #pragma once
 
 #include <bus.h>
+#include <decoder.h>
 
 #include <array>
 #include <bit>
@@ -8,16 +9,6 @@
 
 namespace gba
 {
-  // A simple struct to hold information about the current instruction
-  struct Instruction {
-    uint32_t rawOpcode; // The raw 32-bit opcode fetched from memory
-    uint8_t aluOpcode;  // Bits 21-24 (Specifies ADD, SUB, MOV, etc.)
-    bool iBit;          // Bit 25 Immediate bit (1 = immediate operand, 0 = register operand)
-    bool sBit;          // Bit 20 (Should we update CPSR flags?)
-    uint8_t rn;         // Bits 16-19 First operand register
-    uint8_t rd;         // Bits 12-15 Destination register
-    uint16_t operand2;  // Bits 0-11 Second operand (immediate or register)
-  };
 
   // The GBA's CPU is an ARM7TDMI, which supports both 32-bit ARM instructions and 16-bit Thumb instructions.
   //
@@ -52,12 +43,6 @@ namespace gba
     void fetch();
     void decode();
     void execute();
-
-    void executeDataProcessing(uint32_t opcode);
-    void updateNZFlags(uint32_t result);
-
-    // The Barrel Shifter interface
-    [[nodiscard]] uint32_t getShiftedOperand2(const Instruction& inst) const;
 
     Bus& bus;
 
