@@ -2,6 +2,10 @@
 
 #include <bus.h>
 
+#include <array>
+#include <bit>
+#include <cstdint>
+
 namespace gba
 {
   // A simple struct to hold information about the current instruction
@@ -51,6 +55,9 @@ namespace gba
 
     void executeDataProcessing(uint32_t opcode);
     void updateNZFlags(uint32_t result);
+
+    // The Barrel Shifter interface
+    [[nodiscard]] uint32_t getShiftedOperand2(const Instruction& inst) const;
 
     Bus& bus;
 

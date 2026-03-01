@@ -73,14 +73,8 @@ void CPU::executeDataProcessing(uint32_t opcode)
   const auto& inst = decodedInstruction;
   uint32_t result = 0;
 
-  uint32_t op2Value = 0;
-  if (inst.iBit) {
-    op2Value = inst.operand2 & 0xFF;
-  } else {
-    // TODO - Handle register-based operand2
-    return;
-  }
-
+  // The Barrel Shifter processes the operand BEFORE the ALU gets it
+  uint32_t op2Value = getShiftedOperand2(inst);
   uint32_t op1Value = registers[inst.rn];
 
   switch (inst.aluOpcode) {
@@ -120,6 +114,27 @@ void CPU::updateNZFlags(uint32_t result)
     // Clear N bit
     currentProgramStatusRegister &= ~(1 << 31);
   }
+}
+
+uint32_t CPU::getShiftedOperand2(const Instruction& inst) const
+{
+  if (!inst.iBit)
+    return 0;
+
+  // Bottom 8 bits
+  uint32_t imm8 = inst.operand2 & 0xFF;
+
+  // Top 4 bits
+  uint32_t rotateAmount = (inst.operand2 >> 8) & 0xF;
+
+  // The ARM spec says the rotate amount is doubled
+  uint32_t shift = rotateAmount * 2;
+
+  if (shift == 0)
+    return imm8;
+
+  // 32-bit right rotation
+  return std::rotr(imm8, shift);
 }
 
 uint32_t CPU::getRegister(size_t index) const

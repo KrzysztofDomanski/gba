@@ -75,3 +75,33 @@ TEST_CASE("CPU ALU Data Processing", "[cpu][alu]")
 
   std::filesystem::remove(tempRomPath);
 }
+
+TEST_CASE("CPU Barrel Shifter Immediate", "[cpu][alu][barrel_shifter]")
+{
+  gba::Bus bus;
+
+  std::filesystem::path tempRomPath = "test_barrel_shifter.gba";
+  // MOV R0, #0xFF000000
+  std::vector<uint32_t> instructions = {0xE3A004FF};
+
+  // Write the raw binary instructions to disk
+  {
+    std::ofstream file(tempRomPath, std::ios::binary);
+    file.write(reinterpret_cast<const char*>(instructions.data()), instructions.size() * sizeof(uint32_t));
+  }
+
+  REQUIRE(bus.insertCartridge(tempRomPath) == true);
+
+  gba::CPU cpu(bus);
+
+  SECTION("Execute Rotated Immediate MOV")
+  {
+    cpu.reset();
+    cpu.step();
+
+    // Verify the 8-bit value was safely rotated across the 32-bit boundary
+    REQUIRE(cpu.getRegister(0) == 0xFF000000);
+  }
+
+  std::filesystem::remove(tempRomPath);
+}
