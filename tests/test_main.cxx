@@ -2,7 +2,8 @@
 
 #include <emulator.h>
 
-TEST_CASE("Emulator initializes successfully", "[emulator]") {
+TEST_CASE("Emulator initializes successfully", "[emulator]")
+{
   gba::Emulator emulator;
   REQUIRE(emulator.init() == true);
 }
