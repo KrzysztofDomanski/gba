@@ -2,4 +2,7 @@
 
 using namespace gba;
 
-bool Emulator::init() { return true; }
+bool Emulator::init()
+{
+  return true;
+}

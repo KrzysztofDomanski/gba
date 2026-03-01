@@ -2,9 +2,8 @@
 
 namespace gba
 {
-  class Emulator
-  {
+  class Emulator {
   public:
     [[nodiscard]] bool init();
   };
-}
+} // namespace gba

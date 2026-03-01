@@ -1,7 +1,10 @@
 #pragma once
 
+#include <cartridge.h>
+
 #include <array>
 #include <cstdint>
+#include <filesystem>
 
 namespace gba
 {
@@ -15,8 +18,7 @@ namespace gba
   ///
   /// The GBA is a little-endian system, so multi-byte values are stored with
   /// the least significant byte at the lowest memory address.
-  class Bus
-  {
+  class Bus {
   public:
     Bus();
     ~Bus() = default;
@@ -30,11 +32,16 @@ namespace gba
     void write16(uint32_t address, uint16_t value);
     void write32(uint32_t address, uint32_t value);
 
+    /// insertCartridge() loads the cartridge ROM into the bus
+    bool insertCartridge(const std::filesystem::path& path);
+
   private:
     // External Work Ram (EWRAM) - 256 KB (0x02000000 - 0x0203FFFF)
     std::array<uint8_t, 256 * 1024> ewram{};
 
     // Internal Work Ram (IWRAM) - 32 KB (0x03000000 - 0x03007FFF)
     std::array<uint8_t, 32 * 1024> iwram{};
+
+    Cartridge cartridge;
   };
-}
+} // namespace gba

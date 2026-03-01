@@ -4,17 +4,37 @@ using namespace gba;
 
 Bus::Bus() = default;
 
+bool Bus::insertCartridge(const std::filesystem::path& path)
+{
+  return cartridge.load(path);
+}
+
 uint8_t Bus::read8(uint32_t address) const
 {
   // GBA memory regions are determined by the top 8 bits (address >> 24)
   uint8_t region = address >> 24 & 0xFF;
 
-  switch (region)
-  {
+  switch (region) {
   case 0x02:                         // EWRAM
     return ewram[address & 0x3FFFF]; // Mask to 256 KB
   case 0x03:                         // IWRAM
     return iwram[address & 0x7FFF];  // Mask to 32 KB
+
+  // Rom Wait State 0, 1, and 2 (Addresses: 08, 09, 0A, 0B, 0C, 0D)
+  case 0x08:
+    [[fallthrough]];
+  case 0x09:
+    [[fallthrough]];
+  case 0x0A:
+    [[fallthrough]];
+  case 0x0B:
+    [[fallthrough]];
+  case 0x0C:
+    [[fallthrough]];
+  case 0x0D: {
+    uint32_t romAddress = address & 0x1FFFFFF; // Mask to 32 MB
+    return cartridge.read8(romAddress);
+  }
   default:
     // For now, return 0 for unmapped regions
     return 0;
@@ -25,8 +45,7 @@ void Bus::write8(uint32_t address, uint8_t value)
 {
   uint8_t region = address >> 24 & 0xFF;
 
-  switch (region)
-  {
+  switch (region) {
   case 0x02:                          // EWRAM
     ewram[address & 0x3FFFF] = value; // Mask to 256 KB
     break;
@@ -39,7 +58,7 @@ void Bus::write8(uint32_t address, uint8_t value)
   }
 }
 
-// 16-bit and 32-bit accesses are little-endiant and must be aligned
+// 16-bit and 32-bit accesses are little-endian and must be aligned
 uint16_t Bus::read16(uint32_t address) const
 {
   // Force 16 bit alignment by clearing the least significant bit
@@ -58,8 +77,7 @@ uint32_t Bus::read32(uint32_t address) const
 {
   // Force 32 bit alignment by clearing the least significant 2 bits
   address &= ~3;
-  return read8(address) | (read8(address + 1) << 8) |
-         (read8(address + 2) << 16) | (read8(address + 3) << 24);
+  return read8(address) | (read8(address + 1) << 8) | (read8(address + 2) << 16) | (read8(address + 3) << 24);
 }
 
 void Bus::write32(uint32_t address, uint32_t value)

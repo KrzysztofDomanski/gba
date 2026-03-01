@@ -7,7 +7,11 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(catch2)
 
-add_executable(gba_tests test_main.cxx test_bus.cxx)
+add_executable(gba_tests
+  test_main.cxx
+  test_cartridge.cxx
+  test_bus.cxx
+)
 target_link_libraries(gba_tests PRIVATE gba_core Catch2::Catch2WithMain)
 
 include(Catch)
