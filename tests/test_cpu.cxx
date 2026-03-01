@@ -1,28 +1,32 @@
 #include <catch2/catch_test_macros.hpp>
 #include <cpu.h>
 
-TEST_CASE("CPU Initialization and State", "[CPU]")
+TEST_CASE("CPU Pipeline and PC Offset", "[cpu]")
 {
   gba::Bus bus;
+
+  // Inject a dummy Data Processing opcode (e.g., an ADD instruction) at the entry point
+  // 0xE0810002 is 'ADD R0, R1, R2' in ARM
+  bus.write32(0x08000000, 0xE0810002);
+
   gba::CPU cpu(bus);
 
-  cpu.reset();
-
-  SECTION("Reset sets PC to ROM entry point")
+  SECTION("Pipeline fills correctly on reset")
   {
     cpu.reset();
 
-    // PC should point to ROM entry point
-    REQUIRE(cpu.getRegisters(15) == 0x08000000);
+    // After reset, the pipeline is full.
+    // The PC (R15) should be pointing 8 bytes ahead of the entry point.
+    REQUIRE(cpu.getRegister(15) == 0x08000008);
     REQUIRE(cpu.getCPSR() == 0x0000001F);
   }
 
-  SECTION("Step increments Program Counter")
+  SECTION("Stepping maintains pipeline offset")
   {
     cpu.reset();
+    // Executes instruction at 0x08000000, PC moves to 0x0800000C
     cpu.step();
 
-    // After one step, PC should have advanced by 4 bytes (size of an ARM instruction)
-    REQUIRE(cpu.getRegisters(15) == 0x08000004);
+    REQUIRE(cpu.getRegister(15) == 0x0800000C);
   }
 }

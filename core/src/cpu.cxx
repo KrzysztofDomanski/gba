@@ -14,30 +14,64 @@ void CPU::reset()
   // System Mode, ARM state, IRQ/FIQ (Interrupt Request, Fast Interrupt Request) disabled
   currentProgramStatusRegister = 0x0000001F;
 
-  // Skip the BIOS and point the Program Counter directly at the ROM entry point
+  // The PC (R15) points to the current instruction being FETCHED.
+  // Because of the pipeline, when execution starts at 0x08000000,
+  // the PC will already be at 0x08000008.
   registers[15] = 0x08000000;
 
-  // Set the Stack Pointers to their standard post-BIOS memory locations
-  // TODO Implement banked registers for different CPU modes
-  registers[13] = 0x03007F00; // Standard IWRAM stack location
+  fetch();
+  decode();
+  fetch();
 }
 
 void CPU::step()
 {
-  // Fetch
-  uint32_t currentPc = registers[15];
-
-  // TODO Actually read the instruction from the bus
-  // uint32_t instruction = bus.read32(currentPc);
-
-  // Increment PC
-  // Point to the next instruction (assuming 32-bit instruction size)
-  registers[15] += 4;
-
-  // TODO Decode & Execute
+  execute();
+  decode();
+  fetch();
 }
 
-uint32_t CPU::getRegisters(size_t index) const
+void CPU::fetch()
+{
+  fetchedOpcode = bus.read32(registers[15]);
+  registers[15] += 4;
+}
+
+void CPU::decode()
+{
+  decodedInstruction.opcode = fetchedOpcode;
+}
+
+void CPU::execute()
+{
+  uint32_t opcode = decodedInstruction.opcode;
+
+  // The condition code is always the top 4 bits (31-28)
+  // uint_8t = (opcode >> 28) & 0xF;
+
+  // For now isolate bits 25-27 to figure out the instruction type
+  uint8_t format = (opcode >> 25) & 0x7;
+
+  switch (format) {
+  case 0b000:
+    [[fallthrough]];
+  case 0b001:
+    // Bits 25-27 being 000 or 001 usually means a Data Processing instruction
+    // (e.g., ADD, SUB, AND, ORR)
+    executeDataProcessing(opcode);
+    break;
+  default:
+    break;
+  }
+}
+
+void CPU::executeDataProcessing(uint32_t opcode)
+{
+  // For now, just print the opcode in hex
+  printf("Executing Data Processing instruction: 0x%08X\n", opcode);
+}
+
+uint32_t CPU::getRegister(size_t index) const
 {
   return index >= 16 ? 0 : registers[index];
 }
