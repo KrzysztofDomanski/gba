@@ -43,6 +43,8 @@ namespace gba
     void fetch();
     void decode();
     void execute();
+    void executeBranch();
+    void flushPipeline();
 
     Bus& bus;
 

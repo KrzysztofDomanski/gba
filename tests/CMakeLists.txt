@@ -8,10 +8,11 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(catch2)
 
 add_executable(gba_tests
-  test_main.cxx
+  test_branch.cxx
+  test_bus.cxx
   test_cartridge.cxx
   test_cpu.cxx
-  test_bus.cxx
+  test_main.cxx
 )
 target_link_libraries(gba_tests PRIVATE gba_core Catch2::Catch2WithMain)
 

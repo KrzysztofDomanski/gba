@@ -20,16 +20,24 @@ void CPU::reset()
   // the PC will already be at 0x08000008.
   registers[15] = 0x08000000;
 
-  fetch();
-  decode();
-  fetch();
+  flushPipeline();
 }
 
 void CPU::step()
 {
+  uint32_t pcBefore = registers[15];
+
   execute();
-  decode();
-  fetch();
+
+  // If the PC is exactly the same, this was a normal instruction.
+  // Advance the pipeline as normal.
+  if (registers[15] == pcBefore) {
+    decode();
+    fetch();
+  }
+
+  // If the PC changed, it means we executed a jump instruction.
+  // The pipeline has already been flushed in executeBranch(), so we don't need to do anything here.
 }
 
 void CPU::fetch()
@@ -56,9 +64,45 @@ void CPU::execute()
     // (e.g., ADD, SUB, AND, ORR)
     ALU::executeDataProcessing(decodedInstruction, registers, currentProgramStatusRegister);
     break;
+  case 0b101:
+    executeBranch();
+    break;
   default:
     break;
   }
+}
+
+void CPU::flushPipeline()
+{
+  // A helper to refill the pipeline after a jump
+  fetch();
+  decode();
+  fetch();
+}
+
+void CPU::executeBranch()
+{
+  // Branch with Link (BL) is used for function calls.
+  // It saves the return address into the Link Register (R14)
+  if (decodedInstruction.linkBit) {
+    // Because of the pipeline, PC (R15) is currently pointing to the insutrction
+    // after the next one. We want to return to the instruction immediately
+    // following the branch, which is PC - 4
+    registers[14] = registers[15] - 4;
+  }
+
+  // Calculate target address
+  int32_t byteOffset = decodedInstruction.branchOffset << 2;
+
+  // Add offset to PC
+  // The ARM spec says the offset is relative to PC + 8.
+  // Since our pipeline already naturally advances R15 by 8 bytes ahead of the
+  // currently executing instruction, we can just add the offset to R15 directly.
+  registers[15] += byteOffset;
+
+  // Since the PC has changed the instructions in the Fetch and Decode stages are no longer valid.
+  // We need to flush the pipeline to fetch the correct instructions.
+  flushPipeline();
 }
 
 uint32_t CPU::getRegister(size_t index) const
