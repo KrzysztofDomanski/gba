@@ -6,7 +6,13 @@ namespace gba
 {
   // A simple struct to hold information about the current instruction
   struct Instruction {
-    uint32_t opcode;
+    uint32_t rawOpcode; // The raw 32-bit opcode fetched from memory
+    uint8_t aluOpcode;  // Bits 21-24 (Specifies ADD, SUB, MOV, etc.)
+    bool iBit;          // Bit 25 Immediate bit (1 = immediate operand, 0 = register operand)
+    bool sBit;          // Bit 20 (Should we update CPSR flags?)
+    uint8_t rn;         // Bits 16-19 First operand register
+    uint8_t rd;         // Bits 12-15 Destination register
+    uint16_t operand2;  // Bits 0-11 Second operand (immediate or register)
   };
 
   // The GBA's CPU is an ARM7TDMI, which supports both 32-bit ARM instructions and 16-bit Thumb instructions.
@@ -15,6 +21,10 @@ namespace gba
   // at addresss 0, it is decoding the instruction at +4 and fetching the instruction at +8.
   // This means that the current Program Counter (R15) is always 8 bytes ahead of the instruction being executed in ARM
   // mode.
+  //
+  // When an instruction ends with an 'S' (e.g. ADDS), it means that the instruction should update the CPSR flags based
+  // on the result of the operation: N (negative), Z (zero), C (carry) and V (overflow).
+  // ARM's "Operand 2" uses something called a Barrel Shifter to rotate immediate values.
   class CPU {
   public:
     explicit CPU(Bus& bus_);
@@ -40,6 +50,7 @@ namespace gba
     void execute();
 
     void executeDataProcessing(uint32_t opcode);
+    void updateNZFlags(uint32_t result);
 
     Bus& bus;
 

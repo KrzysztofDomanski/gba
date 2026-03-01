@@ -39,17 +39,20 @@ void CPU::fetch()
 
 void CPU::decode()
 {
-  decodedInstruction.opcode = fetchedOpcode;
+  uint32_t op = fetchedOpcode;
+  decodedInstruction.rawOpcode = op;
+
+  decodedInstruction.iBit = (op >> 25) & 0x1;
+  decodedInstruction.aluOpcode = (op >> 21) & 0xF;
+  decodedInstruction.sBit = (op >> 20) & 0x1;
+  decodedInstruction.rn = (op >> 16) & 0xF;
+  decodedInstruction.rd = (op >> 12) & 0xF;
+  decodedInstruction.operand2 = op & 0xFFF;
 }
 
 void CPU::execute()
 {
-  uint32_t opcode = decodedInstruction.opcode;
-
-  // The condition code is always the top 4 bits (31-28)
-  // uint_8t = (opcode >> 28) & 0xF;
-
-  // For now isolate bits 25-27 to figure out the instruction type
+  uint32_t opcode = decodedInstruction.rawOpcode;
   uint8_t format = (opcode >> 25) & 0x7;
 
   switch (format) {
@@ -67,8 +70,56 @@ void CPU::execute()
 
 void CPU::executeDataProcessing(uint32_t opcode)
 {
-  // For now, just print the opcode in hex
-  printf("Executing Data Processing instruction: 0x%08X\n", opcode);
+  const auto& inst = decodedInstruction;
+  uint32_t result = 0;
+
+  uint32_t op2Value = 0;
+  if (inst.iBit) {
+    op2Value = inst.operand2 & 0xFF;
+  } else {
+    // TODO - Handle register-based operand2
+    return;
+  }
+
+  uint32_t op1Value = registers[inst.rn];
+
+  switch (inst.aluOpcode) {
+  case 0x4: // ADD
+    result = op1Value + op2Value;
+    break;
+  case 0xD: // MOV
+    result = op2Value;
+    break;
+  default:
+    return;
+  }
+
+  registers[inst.rd] = result;
+
+  if (inst.sBit) {
+    updateNZFlags(result);
+  }
+}
+
+void CPU::updateNZFlags(uint32_t result)
+{
+  // Zero Flag (Bit 30): Set if the result is exactly zero
+  if (result == 0) {
+    // Set Z bit
+    currentProgramStatusRegister |= (1 << 30);
+  } else {
+    // Clear Z bit
+    currentProgramStatusRegister &= ~(1 << 30);
+  }
+
+  // Negative Flag (Bit 31): Set if the result is negative (i.e., if the most significant bit is 1)
+  if (result & 0x80000000) {
+    // Set N bit
+    currentProgramStatusRegister |= (1 << 31);
+  } else {
+    // Clear N bit
+    currentProgramStatusRegister &= ~(1 << 31);
+  }
 }
 
 uint32_t CPU::getRegister(size_t index) const
