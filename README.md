@@ -1,3 +1,4 @@
 # GBA Emulator
 
-A learning project for me. In a world where so much code is now written by AI this is my attempt at retaining my coding abilities.
+A learning project for me. A huge thank you to whoever put
+https://mgba-emu.github.io/gbatek/ together
