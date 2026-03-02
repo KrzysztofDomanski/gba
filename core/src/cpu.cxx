@@ -1,5 +1,6 @@
 #include <alu.h>
 #include <cpu.h>
+#include <lsu.h>
 
 using namespace gba;
 
@@ -63,6 +64,9 @@ void CPU::execute()
     // Bits 25-27 being 000 or 001 usually means a Data Processing instruction
     // (e.g., ADD, SUB, AND, ORR)
     ALU::executeDataProcessing(decodedInstruction, registers, currentProgramStatusRegister);
+    break;
+  case 0b010:
+    LSU::executeSingleDataTransfer(decodedInstruction, registers, currentProgramStatusRegister, bus);
     break;
   case 0b101:
     executeBranch();

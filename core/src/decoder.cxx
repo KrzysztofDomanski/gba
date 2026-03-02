@@ -7,6 +7,9 @@ Instruction Decoder::decodeARM(uint32_t opcode)
   Instruction inst;
   inst.rawOpcode = opcode;
 
+  // Bits 25-27 determine the instruction format
+  inst.format = (opcode >> 25) & 0x7;
+
   // Data Processing fields
   inst.iBit = (opcode >> 25) & 0x1;
   inst.aluOpcode = (opcode >> 21) & 0xF;
@@ -22,6 +25,14 @@ Instruction Decoder::decodeARM(uint32_t opcode)
     offset |= 0xFF000000;                // Sign-extend to 32 bits
   }
   inst.branchOffset = static_cast<int32_t>(offset);
+
+  // Load/Store fields
+  inst.pBit = (opcode >> 24) & 0x1;
+  inst.uBit = (opcode >> 23) & 0x1;
+  inst.bBit = (opcode >> 22) & 0x1;
+  inst.wBit = (opcode >> 21) & 0x1;
+  inst.lBit = (opcode >> 20) & 0x1;
+  inst.memoryOffset = opcode & 0xFFF;
 
   return inst;
 }

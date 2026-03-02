@@ -12,6 +12,7 @@ add_executable(gba_tests
   test_bus.cxx
   test_cartridge.cxx
   test_cpu.cxx
+  test_lsu.cxx
   test_main.cxx
 )
 target_link_libraries(gba_tests PRIVATE gba_core Catch2::Catch2WithMain)
