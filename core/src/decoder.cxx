@@ -34,5 +34,8 @@ Instruction Decoder::decodeARM(uint32_t opcode)
   inst.lBit = (opcode >> 20) & 0x1;
   inst.memoryOffset = opcode & 0xFFF;
 
+  // Block Data Transfer fields
+  inst.registerList = opcode & 0xFFFF;
+
   return inst;
 }

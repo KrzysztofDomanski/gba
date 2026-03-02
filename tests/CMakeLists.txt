@@ -8,6 +8,7 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(catch2)
 
 add_executable(gba_tests
+  test_block_transfer.cxx
   test_branch.cxx
   test_bus.cxx
   test_cartridge.cxx

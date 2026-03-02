@@ -1,6 +1,9 @@
 #include <lsu.h>
 
+#include <bit>
+
 using namespace gba;
+
 void LSU::executeSingleDataTransfer(const Instruction& inst, std::array<uint32_t, 16>& registers, uint32_t& cpsr,
                                     Bus& bus)
 {
@@ -44,5 +47,71 @@ void LSU::executeSingleDataTransfer(const Instruction& inst, std::array<uint32_t
     }
     // Write the calculated address back to Rn
     registers[inst.rn] = targetAddress;
+  }
+}
+
+void LSU::executeBlockDataTransfer(const Instruction& inst, std::array<uint32_t, 16>& registers, uint32_t& cpsr,
+                                   Bus& bus)
+{
+  uint32_t baseAddress = registers[inst.rn];
+
+  // Count how many bits are set to 1 in the register list to
+  // determine how many registers we will load/store
+  int numRegisters = std::popcount(inst.registerList);
+  if (numRegisters == 0) {
+    // If the register list is empty, the behavior is UNPREDICTABLE.
+    // For simplicity, we'll just return without doing anything. TODO handle better
+    return;
+  }
+
+  uint32_t startAddress = baseAddress;
+
+  // The total size of the transfer block is 4 * numRegisters (each register is 4 bytes)
+  uint32_t blockSize = 4 * numRegisters;
+  // Calculate the lowest memory address based on the addressing mode (U and P bits)
+  if (inst.uBit) {
+    // Up
+    if (inst.pBit) {
+      // (IB) Increment before
+      startAddress += 4;
+    }
+    // (IA) Increment after - startAddress is baseAddress, so no change needed
+  } else {
+    // Down
+    if (inst.pBit) {
+      // (DB) Decrement before - Standard PUSH
+      startAddress -= blockSize;
+    } else {
+      // (DA) Decrement after - Standard POP
+      startAddress -= 4 * (numRegisters - 1);
+    }
+  }
+
+  uint32_t currentAddress = startAddress;
+
+  // The ARM CPU always transfers registers in order from R0 to R15,
+  // regardless of the order of bits in the register list.
+  for (int regIndex = 0; regIndex < 16; regIndex++) {
+    // If bit regIndex in the register list is set, we need to transfer that register
+    if ((inst.registerList >> regIndex) & 1) {
+      if (inst.lBit) {
+        // LDM (Load Multiple)
+        registers[regIndex] = bus.read32(currentAddress);
+      } else {
+        // STM (Store Multiple)
+        bus.write32(currentAddress, registers[regIndex]);
+      }
+      // Move to the next word in memory
+      currentAddress += 4;
+    }
+  }
+
+  // Write-back (W bit) means we update the base register with the new address after the transfer
+  if (inst.wBit) {
+    if (inst.uBit) {
+      registers[inst.rn] = baseAddress + blockSize;
+    } else {
+      registers[inst.rn] = baseAddress - blockSize;
+    }
   }
 }

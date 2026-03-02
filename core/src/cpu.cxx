@@ -16,6 +16,9 @@ void CPU::reset()
   // System Mode, ARM state, IRQ/FIQ (Interrupt Request, Fast Interrupt Request) disabled
   currentProgramStatusRegister = 0x0000001F;
 
+  // Set the Stack Pointer (R13) to the post-BIOS IWRAM location
+  registers[13] = 0x03007F00;
+
   // The PC (R15) points to the current instruction being FETCHED.
   // Because of the pipeline, when execution starts at 0x08000000,
   // the PC will already be at 0x08000008.
@@ -67,6 +70,9 @@ void CPU::execute()
     break;
   case 0b010:
     LSU::executeSingleDataTransfer(decodedInstruction, registers, currentProgramStatusRegister, bus);
+    break;
+  case 0b100:
+    LSU::executeBlockDataTransfer(decodedInstruction, registers, currentProgramStatusRegister, bus);
     break;
   case 0b101:
     executeBranch();

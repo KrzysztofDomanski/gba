@@ -30,6 +30,9 @@ namespace gba
     bool wBit;             // Write-back bit (Bit 21)
     bool lBit;             // Load/Store bit (Bit 20)
     uint16_t memoryOffset; // 12-bit immediate offset
+
+    // Block Data Transfer
+    uint16_t registerList; // For block data transfer, a bitmask of registers to load/store (Bits 0-15)
   };
 
   class Decoder {
