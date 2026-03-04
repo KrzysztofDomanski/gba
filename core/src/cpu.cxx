@@ -57,6 +57,10 @@ void CPU::decode()
 
 void CPU::execute()
 {
+  if (!checkCondition(decodedInstruction.conditionCode)) {
+    return; // Condition not met, skip execution
+  }
+
   uint32_t opcode = decodedInstruction.rawOpcode;
   uint8_t format = (opcode >> 25) & 0x7;
 
@@ -113,6 +117,50 @@ void CPU::executeBranch()
   // Since the PC has changed the instructions in the Fetch and Decode stages are no longer valid.
   // We need to flush the pipeline to fetch the correct instructions.
   flushPipeline();
+}
+
+bool CPU::checkCondition(uint8_t conditionCode) const
+{
+  // Extract the flags from the CPSR
+  bool n = (currentProgramStatusRegister >> 31) & 0x1; // Negative
+  bool z = (currentProgramStatusRegister >> 30) & 0x1; // Zero
+  bool c = (currentProgramStatusRegister >> 29) & 0x1; // Carry
+  bool v = (currentProgramStatusRegister >> 28) & 0x1; // Overflow
+
+  switch (conditionCode) {
+  case 0x0:
+    return z; // EQ: Equal (Z set)
+  case 0x1:
+    return !z; // NE: Not Equal (Z clear)
+  case 0x2:
+    return c; // CS/HS: Carry Set / Unsigned Higher or Same (C set)
+  case 0x3:
+    return !c; // CC/LO: Carry Clear / Unsigned Lower (C clear)
+  case 0x4:
+    return n; // MI: Minus / Negative (N set)
+  case 0x5:
+    return !n; // PL: Plus / Positive or Zero (N clear)
+  case 0x6:
+    return v; // VS: Overflow (V set)
+  case 0x7:
+    return !v; // VC: No Overflow (V clear)
+  case 0x8:
+    return c && !z; // HI: Unsigned Higher
+  case 0x9:
+    return !c || z; // LS: Unsigned Lower or Same
+  case 0xA:
+    return n == v; // GE: Signed Greater or Equal
+  case 0xB:
+    return n != v; // LT: Signed Less Than
+  case 0xC:
+    return !z && (n == v); // GT: Signed Greater Than
+  case 0xD:
+    return z || (n != v); // LE: Signed Less or Equal
+  case 0xE:
+    return true; // AL: Always
+  default:
+    return false; // 0xF is reserved and should never be used
+  }
 }
 
 uint32_t CPU::getRegister(size_t index) const

@@ -46,6 +46,8 @@ namespace gba
     void executeBranch();
     void flushPipeline();
 
+    [[nodiscard]] bool checkCondition(uint8_t conditionCode) const;
+
     Bus& bus;
 
     // R0-R15

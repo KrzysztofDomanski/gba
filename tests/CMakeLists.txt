@@ -12,6 +12,7 @@ add_executable(gba_tests
   test_branch.cxx
   test_bus.cxx
   test_cartridge.cxx
+  test_conditions.cxx
   test_cpu.cxx
   test_lsu.cxx
   test_main.cxx

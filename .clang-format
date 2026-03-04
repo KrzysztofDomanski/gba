@@ -3,7 +3,6 @@ IndentWidth: 2
 TabWidth: 2
 UseTab: Never
 ColumnLimit: 120
-AllowShortFunctionsOnASingleLine: false
 AllowShortBlocksOnASingleLine: false
 NamespaceIndentation: All
 PointerAlignment: Left
@@ -12,6 +11,7 @@ AlignConsecutiveShortCaseStatements:
   AcrossEmptyLines: true
   AcrossComments: true
   AlignCaseColons: false
+AllowShortFunctionsOnASingleLine: false
 AllowAllArgumentsOnNextLine: true
 BreakBeforeBraces: Custom
 BraceWrapping:

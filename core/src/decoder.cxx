@@ -7,6 +7,9 @@ Instruction Decoder::decodeARM(uint32_t opcode)
   Instruction inst;
   inst.rawOpcode = opcode;
 
+  // Condition code is always in bits 28-31
+  inst.conditionCode = (opcode >> 28) & 0xF;
+
   // Bits 25-27 determine the instruction format
   inst.format = (opcode >> 25) & 0x7;
 

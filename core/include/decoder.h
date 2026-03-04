@@ -8,6 +8,9 @@ namespace gba
   struct Instruction {
     uint32_t rawOpcode; // The raw 32-bit opcode fetched from memory
 
+    // Condition Code (Bits 28-31)
+    uint8_t conditionCode;
+
     // Format identifier (Bits 25-27)
     uint8_t format;
 
