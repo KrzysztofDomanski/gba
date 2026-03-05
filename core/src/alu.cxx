@@ -12,21 +12,48 @@ void ALU::executeDataProcessing(const Instruction& inst, std::array<uint32_t, 16
   uint32_t op2Value = getShiftedOperand2(inst, registers);
   uint32_t op1Value = registers[inst.rn];
 
+  // Determine if we should write to Rd or not
+  // Opcodes 0x8-0xB (TST, TEQ, CMP, CMN) do not write to Rd, but still update flags based on the result
+  bool writeToRd = (inst.aluOpcode < 0x8 || inst.aluOpcode > 0xB);
+
   switch (inst.aluOpcode) {
-    case 0x4: // ADD
+    case 0x0: // AND (Logical AND)
+      result = op1Value & op2Value;
+      break;
+
+    case 0x2: // SUB (Subtraction)
+      result = op1Value - op2Value;
+      break;
+
+    case 0x4: // ADD (Addition)
       result = op1Value + op2Value;
       break;
-    case 0xD: // MOV
+
+    case 0xA: // CMP (Compare - same math as SUB)
+      result = op1Value - op2Value;
+      break;
+
+    case 0xC: // ORR (Logical OR)
+      result = op1Value | op2Value;
+      break;
+
+    case 0xD: // MOV (Move)
       result = op2Value;
       break;
+
     default:
       return;
   }
 
-  registers[inst.rd] = result;
+  if (writeToRd) {
+    registers[inst.rd] = result;
+  }
 
-  if (inst.sBit) {
+  if (inst.sBit || !writeToRd) {
     updateNZFlags(result, cpsr);
+
+    // TODO Once we handle Carry (C) and Overflow (V) flags, we'll need to update those here as well for certain
+    // instructions (SUB and CMP)
   }
 }
 
