@@ -115,3 +115,54 @@ void LSU::executeBlockDataTransfer(const Instruction& inst, std::array<uint32_t,
     }
   }
 }
+
+void LSU::executeHalfwordTransfer(const Instruction& inst, std::array<uint32_t, 16>& registers, Bus& bus)
+{
+  uint32_t baseAddress = registers[inst.rn];
+
+  // Determine offset (Immediate vs Register)
+  uint32_t offset = 0;
+  if (inst.iBit) {
+    offset = inst.memoryOffset;
+  } else {
+    offset = registers[inst.memoryOffset & 0xF];
+  }
+
+  uint32_t targetAddress = baseAddress;
+
+  // P Bit determines PRE or POST indexing
+  if (inst.pBit) {
+    // U = 1 (UP). U = 2 (DOWN).
+    if (inst.uBit) {
+      targetAddress += offset;
+    } else {
+      targetAddress -= offset;
+    }
+  }
+
+  // TODO Only supporting unsigned halfwords (hwOpcode 0b01) for now. Need to implement signed halfword transfers (LDRSH
+  // and STRSH) as well.
+  if (inst.hwOpcode == 0b01) {
+    if (inst.lBit) {
+      // LDRH: Load Register Halfword (Zero-extended to 32 bits)
+      registers[inst.rd] = bus.read16(targetAddress);
+    } else {
+      // STRH: Store Register Halfword (Lower 16 bits of the register)
+      bus.write16(targetAddress, static_cast<uint16_t>(registers[inst.rd] & 0xFFFF));
+    }
+  }
+
+  // Post-indexing or Write-Back (W = 1) means we update the base register with the new address
+  if (!inst.pBit || inst.wBit) {
+    if (!inst.pBit) {
+      // Post indexing always uses the offset applied to the base address
+      if (inst.uBit) {
+        targetAddress = baseAddress + offset;
+      } else {
+        targetAddress = baseAddress - offset;
+      }
+    }
+    // Write the calculated address back to Rn
+    registers[inst.rn] = targetAddress;
+  }
+}

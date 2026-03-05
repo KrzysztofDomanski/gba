@@ -19,5 +19,9 @@ namespace gba
     // block data transfer instructions (Format 100) based on the pBit, uBit, wBit and lBit fields.
     static void executeBlockDataTransfer(const Instruction& inst, std::array<uint32_t, 16>& registers, uint32_t& cpsr,
                                          Bus& bus);
+
+    // executeHalfwordTransfer() takes a decoded instruction and performs the appropriate Load or Store operation for
+    // halfword and signed data transfer instructions based on the pBit, uBit, bBit, wBit, lBit and hwOpcode fields.
+    static void executeHalfwordTransfer(const Instruction& inst, std::array<uint32_t, 16>& registers, Bus& bus);
   };
 } // namespace gba

@@ -66,7 +66,12 @@ void CPU::execute()
 
   switch (format) {
     case 0b000:
-      [[fallthrough]];
+      if (decodedInstruction.isHalfwordTransfer) {
+        LSU::executeHalfwordTransfer(decodedInstruction, registers, bus);
+      } else {
+        ALU::executeDataProcessing(decodedInstruction, registers, currentProgramStatusRegister);
+      }
+      break;
     case 0b001:
       // Bits 25-27 being 000 or 001 usually means a Data Processing instruction
       // (e.g., ADD, SUB, AND, ORR)

@@ -46,6 +46,12 @@ namespace gba
 
     // Block Data Transfer
     uint16_t registerList; // For block data transfer, a bitmask of registers to load/store (Bits 0-15)
+
+    // Halfword and Signed Data Transfer
+    // Arm added this late when they run out of top-level instruction formats, so they had to reuse the single data
+    // transfer format with some extra bits to specify the halfword/signed transfer
+    bool isHalfwordTransfer;
+    uint8_t hwOpcode; // For halfword and signed data transfer instructions, the specific opcode (Bits 5-6)
   };
 
   class Decoder {
