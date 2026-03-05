@@ -13,14 +13,14 @@ void ALU::executeDataProcessing(const Instruction& inst, std::array<uint32_t, 16
   uint32_t op1Value = registers[inst.rn];
 
   switch (inst.aluOpcode) {
-  case 0x4: // ADD
-    result = op1Value + op2Value;
-    break;
-  case 0xD: // MOV
-    result = op2Value;
-    break;
-  default:
-    return;
+    case 0x4: // ADD
+      result = op1Value + op2Value;
+      break;
+    case 0xD: // MOV
+      result = op2Value;
+      break;
+    default:
+      return;
   }
 
   registers[inst.rd] = result;
@@ -84,31 +84,31 @@ uint32_t ALU::getShiftedOperand2(const Instruction& inst, const std::array<uint3
     return value;
 
   switch (inst.shiftType) {
-  case 0x0: // LSL (logical shift left)
-    if (shift >= 32)
-      return 0;
-    return value << shift;
+    case 0x0: // LSL (logical shift left)
+      if (shift >= 32)
+        return 0;
+      return value << shift;
 
-  case 0x1: // LSR (logical shift right)
-    if (shift >= 32)
-      return 0;
-    return value >> shift;
+    case 0x1: // LSR (logical shift right)
+      if (shift >= 32)
+        return 0;
+      return value >> shift;
 
-  case 0x2: // ASR (arithmetic shift right)
-    if (shift >= 32) {
-      // If signed bit is 1, fill with 1s, otherwise fill with 0s
-      return (value & 0x80000000) ? 0xFFFFFFFF : 0;
-    }
-    return static_cast<int32_t>(value) >> shift;
+    case 0x2: // ASR (arithmetic shift right)
+      if (shift >= 32) {
+        // If signed bit is 1, fill with 1s, otherwise fill with 0s
+        return (value & 0x80000000) ? 0xFFFFFFFF : 0;
+      }
+      return static_cast<int32_t>(value) >> shift;
 
-  case 0x3: // ROR (rotate right)
-    // Rotate amounts are effectively mod 32
-    shift = shift % 32;
-    if (shift == 0)
+    case 0x3: // ROR (rotate right)
+      // Rotate amounts are effectively mod 32
+      shift = shift % 32;
+      if (shift == 0)
+        return value;
+      return std::rotr(value, shift);
+
+    default:
       return value;
-    return std::rotr(value, shift);
-
-  default:
-    return value;
   }
 }

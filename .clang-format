@@ -24,3 +24,4 @@ BraceWrapping:
   AfterUnion: true
   BeforeCatch: true
   BeforeElse: false
+IndentCaseLabels: true

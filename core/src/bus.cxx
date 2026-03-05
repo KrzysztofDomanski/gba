@@ -15,29 +15,29 @@ uint8_t Bus::read8(uint32_t address) const
   uint8_t region = address >> 24 & 0xFF;
 
   switch (region) {
-  case 0x02:                         // EWRAM
-    return ewram[address & 0x3FFFF]; // Mask to 256 KB
-  case 0x03:                         // IWRAM
-    return iwram[address & 0x7FFF];  // Mask to 32 KB
+    case 0x02:                         // EWRAM
+      return ewram[address & 0x3FFFF]; // Mask to 256 KB
+    case 0x03:                         // IWRAM
+      return iwram[address & 0x7FFF];  // Mask to 32 KB
 
-  // Rom Wait State 0, 1, and 2 (Addresses: 08, 09, 0A, 0B, 0C, 0D)
-  case 0x08:
-    [[fallthrough]];
-  case 0x09:
-    [[fallthrough]];
-  case 0x0A:
-    [[fallthrough]];
-  case 0x0B:
-    [[fallthrough]];
-  case 0x0C:
-    [[fallthrough]];
-  case 0x0D: {
-    uint32_t romAddress = address & 0x1FFFFFF; // Mask to 32 MB
-    return cartridge.read8(romAddress);
-  }
-  default:
-    // For now, return 0 for unmapped regions
-    return 0;
+    // Rom Wait State 0, 1, and 2 (Addresses: 08, 09, 0A, 0B, 0C, 0D)
+    case 0x08:
+      [[fallthrough]];
+    case 0x09:
+      [[fallthrough]];
+    case 0x0A:
+      [[fallthrough]];
+    case 0x0B:
+      [[fallthrough]];
+    case 0x0C:
+      [[fallthrough]];
+    case 0x0D: {
+      uint32_t romAddress = address & 0x1FFFFFF; // Mask to 32 MB
+      return cartridge.read8(romAddress);
+    }
+    default:
+      // For now, return 0 for unmapped regions
+      return 0;
   }
 }
 
@@ -46,15 +46,15 @@ void Bus::write8(uint32_t address, uint8_t value)
   uint8_t region = address >> 24 & 0xFF;
 
   switch (region) {
-  case 0x02:                          // EWRAM
-    ewram[address & 0x3FFFF] = value; // Mask to 256 KB
-    break;
-  case 0x03:                         // IWRAM
-    iwram[address & 0x7FFF] = value; // Mask to 32 KB
-    break;
-  default:
-    // Ignore writes to unmapped regions for now
-    break;
+    case 0x02:                          // EWRAM
+      ewram[address & 0x3FFFF] = value; // Mask to 256 KB
+      break;
+    case 0x03:                         // IWRAM
+      iwram[address & 0x7FFF] = value; // Mask to 32 KB
+      break;
+    default:
+      // Ignore writes to unmapped regions for now
+      break;
   }
 }
 

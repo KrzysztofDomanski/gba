@@ -65,24 +65,24 @@ void CPU::execute()
   uint8_t format = (opcode >> 25) & 0x7;
 
   switch (format) {
-  case 0b000:
-    [[fallthrough]];
-  case 0b001:
-    // Bits 25-27 being 000 or 001 usually means a Data Processing instruction
-    // (e.g., ADD, SUB, AND, ORR)
-    ALU::executeDataProcessing(decodedInstruction, registers, currentProgramStatusRegister);
-    break;
-  case 0b010:
-    LSU::executeSingleDataTransfer(decodedInstruction, registers, currentProgramStatusRegister, bus);
-    break;
-  case 0b100:
-    LSU::executeBlockDataTransfer(decodedInstruction, registers, currentProgramStatusRegister, bus);
-    break;
-  case 0b101:
-    executeBranch();
-    break;
-  default:
-    break;
+    case 0b000:
+      [[fallthrough]];
+    case 0b001:
+      // Bits 25-27 being 000 or 001 usually means a Data Processing instruction
+      // (e.g., ADD, SUB, AND, ORR)
+      ALU::executeDataProcessing(decodedInstruction, registers, currentProgramStatusRegister);
+      break;
+    case 0b010:
+      LSU::executeSingleDataTransfer(decodedInstruction, registers, currentProgramStatusRegister, bus);
+      break;
+    case 0b100:
+      LSU::executeBlockDataTransfer(decodedInstruction, registers, currentProgramStatusRegister, bus);
+      break;
+    case 0b101:
+      executeBranch();
+      break;
+    default:
+      break;
   }
 }
 
@@ -128,38 +128,38 @@ bool CPU::checkCondition(uint8_t conditionCode) const
   bool v = (currentProgramStatusRegister >> 28) & 0x1; // Overflow
 
   switch (conditionCode) {
-  case 0x0:
-    return z; // EQ: Equal (Z set)
-  case 0x1:
-    return !z; // NE: Not Equal (Z clear)
-  case 0x2:
-    return c; // CS/HS: Carry Set / Unsigned Higher or Same (C set)
-  case 0x3:
-    return !c; // CC/LO: Carry Clear / Unsigned Lower (C clear)
-  case 0x4:
-    return n; // MI: Minus / Negative (N set)
-  case 0x5:
-    return !n; // PL: Plus / Positive or Zero (N clear)
-  case 0x6:
-    return v; // VS: Overflow (V set)
-  case 0x7:
-    return !v; // VC: No Overflow (V clear)
-  case 0x8:
-    return c && !z; // HI: Unsigned Higher
-  case 0x9:
-    return !c || z; // LS: Unsigned Lower or Same
-  case 0xA:
-    return n == v; // GE: Signed Greater or Equal
-  case 0xB:
-    return n != v; // LT: Signed Less Than
-  case 0xC:
-    return !z && (n == v); // GT: Signed Greater Than
-  case 0xD:
-    return z || (n != v); // LE: Signed Less or Equal
-  case 0xE:
-    return true; // AL: Always
-  default:
-    return false; // 0xF is reserved and should never be used
+    case 0x0:
+      return z; // EQ: Equal (Z set)
+    case 0x1:
+      return !z; // NE: Not Equal (Z clear)
+    case 0x2:
+      return c; // CS/HS: Carry Set / Unsigned Higher or Same (C set)
+    case 0x3:
+      return !c; // CC/LO: Carry Clear / Unsigned Lower (C clear)
+    case 0x4:
+      return n; // MI: Minus / Negative (N set)
+    case 0x5:
+      return !n; // PL: Plus / Positive or Zero (N clear)
+    case 0x6:
+      return v; // VS: Overflow (V set)
+    case 0x7:
+      return !v; // VC: No Overflow (V clear)
+    case 0x8:
+      return c && !z; // HI: Unsigned Higher
+    case 0x9:
+      return !c || z; // LS: Unsigned Lower or Same
+    case 0xA:
+      return n == v; // GE: Signed Greater or Equal
+    case 0xB:
+      return n != v; // LT: Signed Less Than
+    case 0xC:
+      return !z && (n == v); // GT: Signed Greater Than
+    case 0xD:
+      return z || (n != v); // LE: Signed Less or Equal
+    case 0xE:
+      return true; // AL: Always
+    default:
+      return false; // 0xF is reserved and should never be used
   }
 }
 
