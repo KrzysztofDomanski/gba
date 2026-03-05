@@ -20,7 +20,17 @@ namespace gba
     bool sBit;         // Bit 20 (Should we update CPSR flags?)
     uint8_t rn;        // Bits 16-19 First operand register
     uint8_t rd;        // Bits 12-15 Destination register
-    uint16_t operand2; // Bits 0-11 Second operand (immediate or register)
+
+    // Immediate operand (I == 1)
+    uint16_t operand2;
+
+    // Register Operand (I == 0)
+    uint8_t rm;           // Register to be shifted Bits 0-3
+    bool shiftByRegister; // Whether the shift amount is specified in a register (Bit 4)
+    // Logical Shift Left (LSL), Logical Shift Right (LSR), Arithmetic Shift Right (ASR), Rotate Right (ROR)
+    uint8_t shiftType;   // LSL, LSR, ASR, ROR (Bits 5-6)
+    uint8_t shiftAmount; // Constant shift amount (Bits 7-11)
+    uint8_t rs;          // Register that contains the shift amount (Bits 8-11)
 
     // Branch
     int32_t branchOffset; // For branch instructions, the signed offset to apply to the PC

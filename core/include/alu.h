@@ -14,7 +14,8 @@ namespace gba
     static void executeDataProcessing(const Instruction& inst, std::array<uint32_t, 16>& registers, uint32_t& cpsr);
 
   private:
-    [[nodiscard]] static uint32_t getShiftedOperand2(const Instruction& inst);
+    [[nodiscard]] static uint32_t getShiftedOperand2(const Instruction& inst,
+                                                     const std::array<uint32_t, 16>& registers);
     static void updateNZFlags(uint32_t result, uint32_t& cpsr);
   };
 } // namespace gba

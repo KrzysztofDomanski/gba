@@ -19,7 +19,20 @@ Instruction Decoder::decodeARM(uint32_t opcode)
   inst.sBit = (opcode >> 20) & 0x1;
   inst.rn = (opcode >> 16) & 0xF;
   inst.rd = (opcode >> 12) & 0xF;
-  inst.operand2 = opcode & 0xFFF;
+
+  if (inst.iBit) {
+    inst.operand2 = opcode & 0xFFF;
+  } else {
+    inst.rm = opcode & 0xF;
+    inst.shiftByRegister = (opcode >> 4) & 0x1;
+    inst.shiftType = (opcode >> 5) & 0x3;
+
+    if (inst.shiftByRegister) {
+      inst.rs = (opcode >> 8) & 0xF;
+    } else {
+      inst.shiftAmount = (opcode >> 7) & 0x1F;
+    }
+  }
 
   // Branch fields
   inst.linkBit = (opcode >> 24) & 0x1;
