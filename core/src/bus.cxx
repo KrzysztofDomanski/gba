@@ -17,8 +17,20 @@ uint8_t Bus::read8(uint32_t address) const
   switch (region) {
     case 0x02:                         // EWRAM
       return ewram[address & 0x3FFFF]; // Mask to 256 KB
-    case 0x03:                         // IWRAM
-      return iwram[address & 0x7FFF];  // Mask to 32 KB
+
+    case 0x03:                        // IWRAM
+      return iwram[address & 0x7FFF]; // Mask to 32 KB
+
+    case 0x06: { // VRAM
+      // The GBA actually allocates 128 KB of address space for VRAM,
+      // but only 96 KB of physical memory. The last 32 KB is a mirror of
+      // the first 32 KB.
+      uint32_t vramAddress = address & 0x0001FFFF;
+      if (vramAddress >= 96 * 1024) {
+        vramAddress -= (32 * 1024); // Mirror the last 32 KB of VRAM
+      }
+      return vram[vramAddress]; // Mask to 96 KB
+    }
 
     // Rom Wait State 0, 1, and 2 (Addresses: 08, 09, 0A, 0B, 0C, 0D)
     case 0x08:
@@ -52,6 +64,14 @@ void Bus::write8(uint32_t address, uint8_t value)
     case 0x03:                         // IWRAM
       iwram[address & 0x7FFF] = value; // Mask to 32 KB
       break;
+    case 0x06: { // VRAM
+      uint32_t vramAddress = address & 0x0001FFFF;
+      if (vramAddress >= 96 * 1024) {
+        vramAddress -= (32 * 1024); // Mirror the last 32 KB of VRAM
+      }
+      vram[vramAddress] = value; // Mask to 96 KB
+      break;
+    }
     default:
       // Ignore writes to unmapped regions for now
       break;

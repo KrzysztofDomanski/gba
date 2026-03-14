@@ -42,6 +42,9 @@ namespace gba
     // Internal Work Ram (IWRAM) - 32 KB (0x03000000 - 0x03007FFF)
     std::array<uint8_t, 32 * 1024> iwram{};
 
+    // Video RAM (VRAM) - 96 KB (0x06000000 - 0x06017FFF)
+    std::array<uint8_t, 96 * 1024> vram{};
+
     Cartridge cartridge;
   };
 } // namespace gba
