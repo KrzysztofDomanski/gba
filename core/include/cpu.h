@@ -38,6 +38,14 @@ namespace gba
       return currentProgramStatusRegister;
     };
 
+    // For testing
+    void setRegister(size_t index, uint32_t value)
+    {
+      if (index < 16) {
+        registers[index] = value;
+      }
+    }
+
   private:
     // Pipeline stages
     void fetch();

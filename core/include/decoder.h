@@ -52,6 +52,9 @@ namespace gba
     // transfer format with some extra bits to specify the halfword/signed transfer
     bool isHalfwordTransfer;
     uint8_t hwOpcode; // For halfword and signed data transfer instructions, the specific opcode (Bits 5-6)
+
+    // Branch and Exchange (BX) instruction
+    bool isBx;
   };
 
   class Decoder {

@@ -11,6 +11,7 @@ add_executable(gba_tests
   test_block_transfer.cxx
   test_branch.cxx
   test_bus.cxx
+  test_bx.cxx
   test_cartridge.cxx
   test_conditions.cxx
   test_cpu.cxx

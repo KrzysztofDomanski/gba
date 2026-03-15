@@ -13,6 +13,13 @@ Instruction Decoder::decodeARM(uint32_t opcode)
   // Bits 25-27 determine the instruction format
   inst.format = (opcode >> 25) & 0x7;
 
+  // Detect BX instruction (Bits 4-27 must match 0x012FFF1)
+  inst.isBx = ((opcode & 0x0FFFFFF0) == 0x012FFF10);
+  if (inst.isBx) {
+    inst.rm = opcode & 0xF; // The register to branch to is in bits 0-3
+    return inst;            // We can return early since BX doesn't use the other fields
+  }
+
   // Detect halfwrod/signed data transfer instructions by checking for the specific bit pattern in bits 4-7
   inst.isHalfwordTransfer = (inst.format == 0b000) && ((opcode >> 4) & 0x1) == 1 && ((opcode >> 7) & 0x1) == 1;
 

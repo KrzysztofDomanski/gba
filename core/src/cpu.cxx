@@ -46,19 +46,59 @@ void CPU::step()
 
 void CPU::fetch()
 {
-  fetchedOpcode = bus.read32(registers[15]);
-  registers[15] += 4;
+  // Check bit 5 of CPSR to determine the current state
+  bool isThumb = currentProgramStatusRegister & 0x20;
+
+  if (isThumb) {
+    // THUMB state - fetch a 16-bit instruction
+    // Advance the PC by 2 bytes to point to the next instruction
+    fetchedOpcode = bus.read16(registers[15]);
+    registers[15] += 2;
+  } else {
+    // ARM state - fetch a 32-bit instruction
+    // Advance the PC by 4 bytes to point to the next instruction
+    fetchedOpcode = bus.read32(registers[15]);
+    registers[15] += 4;
+  }
 }
 
 void CPU::decode()
 {
-  decodedInstruction = Decoder::decodeARM(fetchedOpcode);
+  bool isThumb = currentProgramStatusRegister & 0x20;
+
+  if (isThumb) {
+    // Until ThumbDecoder is implemented we can just treat this as NOPs to avoid crashes
+    decodedInstruction = Instruction{};
+    // AL (Always) - so that it doesn't get filtered out by checkCondition()
+    decodedInstruction.conditionCode = 0xE;
+  } else {
+    decodedInstruction = Decoder::decodeARM(fetchedOpcode);
+  }
 }
 
 void CPU::execute()
 {
   if (!checkCondition(decodedInstruction.conditionCode)) {
     return; // Condition not met, skip execution
+  }
+
+  // Handle branch and exchange
+  if (decodedInstruction.isBx) {
+    uint32_t targetAddress = registers[decodedInstruction.rm];
+
+    // Check the lowest bit to determie the new state
+    if (targetAddress & 1) {
+      // Bit 5 set = THUMB state
+      currentProgramStatusRegister |= 0x20; // Set bit 5 to switch to THUMB state
+    } else {
+      // Bit 5 clear = ARM state
+      currentProgramStatusRegister &= ~0x20; // Clear bit 5 to switch to ARM state
+    }
+
+    // Clear the lowest bit to get the actual address
+    registers[15] = targetAddress & ~1;
+    flushPipeline();
+    return;
   }
 
   uint32_t opcode = decodedInstruction.rawOpcode;
