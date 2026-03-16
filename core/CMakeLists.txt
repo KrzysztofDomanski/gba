@@ -9,5 +9,6 @@ add_library(gba_core STATIC
   src/ppu.cxx
   src/thumb_alu.cxx
   src/thumb_decoder.cxx
+  src/thumb_lsu.cxx
 )
 target_include_directories(gba_core PUBLIC include)

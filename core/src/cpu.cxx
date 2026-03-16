@@ -2,6 +2,7 @@
 #include <cpu.h>
 #include <lsu.h>
 #include <thumb_alu.h>
+#include <thumb_lsu.h>
 
 using namespace gba;
 
@@ -77,6 +78,10 @@ void CPU::execute()
     switch (decodedThumbInstruction.format) {
       case 3:
         ThumbALU::executeFormat3(decodedThumbInstruction, registers, currentProgramStatusRegister);
+        break;
+
+      case 9:
+        ThumbLSU::executeFormat9(decodedThumbInstruction, registers, bus);
         break;
 
       case 16:

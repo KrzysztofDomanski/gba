@@ -21,6 +21,11 @@ namespace gba
     // Branching
     uint8_t cond;
     uint32_t branchOffset;
+
+    // Load/Store
+    uint8_t rb; // Base register for load/store (Bits 3-5)
+    bool bBit;  // Byte/Word flag
+    bool lBit;  // Load/Store flag
   };
 
   class ThumbDecoder {

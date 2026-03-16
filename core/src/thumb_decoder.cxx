@@ -16,6 +16,17 @@ ThumbInstruction ThumbDecoder::decode(uint16_t rawOpcode)
     return inst;
   }
 
+  // Detect Format 9 where the top 3 bits are 011
+  if ((rawOpcode >> 13) == 0b011) {
+    inst.format = 9;
+    inst.bBit = (rawOpcode >> 12) & 0x1;      // Bit 12 is the B bit
+    inst.lBit = (rawOpcode >> 11) & 0x1;      // Bit 11 is the L bit
+    inst.immediate = (rawOpcode >> 6) & 0x1F; // 5-bit offset
+    inst.rb = (rawOpcode >> 3) & 0x7;         // Bits 3-5 for base register
+    inst.rd = rawOpcode & 0x7;                // Bits 0-2 for destination register
+    return inst;
+  }
+
   // Detect format 16: Conditional branch
   // Top 4 bits are 1101
   if ((rawOpcode >> 12) == 0xD) {
