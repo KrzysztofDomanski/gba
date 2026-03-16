@@ -2,6 +2,7 @@
 
 #include <bus.h>
 #include <decoder.h>
+#include <thumb_decoder.h>
 
 #include <array>
 #include <bit>
@@ -68,5 +69,6 @@ namespace gba
     // Pipeline state
     uint32_t fetchedOpcode = 0;
     Instruction decodedInstruction;
+    ThumbInstruction decodedThumbInstruction;
   };
 } // namespace gba

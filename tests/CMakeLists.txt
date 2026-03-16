@@ -21,6 +21,7 @@ add_executable(gba_tests
   test_main.cxx
   test_ppu.cxx
   test_shifts.cxx
+  test_thumb_decode.cxx
   test_vram.cxx
 )
 target_link_libraries(gba_tests PRIVATE gba_core Catch2::Catch2WithMain)

@@ -67,10 +67,7 @@ void CPU::decode()
   bool isThumb = currentProgramStatusRegister & 0x20;
 
   if (isThumb) {
-    // Until ThumbDecoder is implemented we can just treat this as NOPs to avoid crashes
-    decodedInstruction = Instruction{};
-    // AL (Always) - so that it doesn't get filtered out by checkCondition()
-    decodedInstruction.conditionCode = 0xE;
+    decodedThumbInstruction = ThumbDecoder::decode(static_cast<uint16_t>(fetchedOpcode));
   } else {
     decodedInstruction = Decoder::decodeARM(fetchedOpcode);
   }
