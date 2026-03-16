@@ -1,6 +1,7 @@
 #include <alu.h>
 #include <cpu.h>
 #include <lsu.h>
+#include <thumb_alu.h>
 
 using namespace gba;
 
@@ -75,6 +76,20 @@ void CPU::decode()
 
 void CPU::execute()
 {
+  bool isThumb = currentProgramStatusRegister & 0x20;
+  if (isThumb) {
+    switch (decodedThumbInstruction.format) {
+      case 3:
+        ThumbALU::executeFormat3(decodedThumbInstruction, registers, currentProgramStatusRegister);
+        break;
+      default:
+        break; // Unimplemented THUMB formats do nothing for now
+    }
+
+    // Return early since we don't want to execute ARM instructions when in THUMB state
+    return;
+  }
+
   if (!checkCondition(decodedInstruction.conditionCode)) {
     return; // Condition not met, skip execution
   }
@@ -126,7 +141,7 @@ void CPU::execute()
     default:
       break;
   }
-}
+} 
 
 void CPU::flushPipeline()
 {

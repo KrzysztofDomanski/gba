@@ -21,6 +21,7 @@ add_executable(gba_tests
   test_main.cxx
   test_ppu.cxx
   test_shifts.cxx
+  test_thumb_alu.cxx
   test_thumb_decode.cxx
   test_vram.cxx
 )
