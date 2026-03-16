@@ -26,6 +26,10 @@ namespace gba
     uint8_t rb; // Base register for load/store (Bits 3-5)
     bool bBit;  // Byte/Word flag
     bool lBit;  // Load/Store flag
+
+    // Push/Pop
+    uint8_t registerList; // Bitmask of registers for push/pop (Bits 0-7)
+    bool rBit;            // Register list bit (Bit 8) for push/pop
   };
 
   class ThumbDecoder {

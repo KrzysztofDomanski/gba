@@ -27,6 +27,16 @@ ThumbInstruction ThumbDecoder::decode(uint16_t rawOpcode)
     return inst;
   }
 
+  // Detect Format 14: Push/Pop Registers
+  // The top 4 bits are 1011 (0xB), and bits 9-10 are 10
+  if ((rawOpcode >> 12) == 0xB && ((rawOpcode >> 9) & 0x3) == 0b10) {
+    inst.format = 14;
+    inst.lBit = (rawOpcode >> 11) & 0x1;  // Bit 11 is the L bit (1 for POP, 0 for PUSH)
+    inst.rBit = (rawOpcode >> 8) & 0x1;   // Bit 8 for R bit
+    inst.registerList = rawOpcode & 0xFF; // Bits 0-7 for register list
+    return inst;
+  }
+
   // Detect format 16: Conditional branch
   // Top 4 bits are 1101
   if ((rawOpcode >> 12) == 0xD) {

@@ -84,6 +84,12 @@ void CPU::execute()
         ThumbLSU::executeFormat9(decodedThumbInstruction, registers, bus);
         break;
 
+      case 14:
+        if (ThumbLSU::executeFormat14(decodedThumbInstruction, registers, bus)) {
+          flushPipeline(); // PC was modified, flush the pipeline to fetch the correct instructions
+        }
+        break;  
+
       case 16:
         if (checkCondition(decodedThumbInstruction.cond)) {
           // THUMB branch offsets are 11 bits and represent multiples of 2 bytes
