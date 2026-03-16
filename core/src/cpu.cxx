@@ -30,19 +30,15 @@ void CPU::reset()
 
 void CPU::step()
 {
-  uint32_t pcBefore = registers[15];
-
+  pipelineFlushed = false;
   execute();
 
   // If the PC is exactly the same, this was a normal instruction.
   // Advance the pipeline as normal.
-  if (registers[15] == pcBefore) {
+  if (!pipelineFlushed) {
     decode();
     fetch();
   }
-
-  // If the PC changed, it means we executed a jump instruction.
-  // The pipeline has already been flushed in executeBranch(), so we don't need to do anything here.
 }
 
 void CPU::fetch()
@@ -81,6 +77,18 @@ void CPU::execute()
     switch (decodedThumbInstruction.format) {
       case 3:
         ThumbALU::executeFormat3(decodedThumbInstruction, registers, currentProgramStatusRegister);
+        break;
+
+      case 16:
+        if (checkCondition(decodedThumbInstruction.cond)) {
+          // THUMB branch offsets are 11 bits and represent multiples of 2 bytes
+          int32_t byteOffset = decodedThumbInstruction.branchOffset << 1;
+
+          registers[15] += byteOffset;
+
+          // PC has changed so we need to flush the pipeline to fetch the correct instructions
+          flushPipeline();
+        }
         break;
       default:
         break; // Unimplemented THUMB formats do nothing for now
@@ -141,7 +149,7 @@ void CPU::execute()
     default:
       break;
   }
-} 
+}
 
 void CPU::flushPipeline()
 {
@@ -149,6 +157,7 @@ void CPU::flushPipeline()
   fetch();
   decode();
   fetch();
+  pipelineFlushed = true;
 }
 
 void CPU::executeBranch()

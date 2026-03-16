@@ -16,6 +16,17 @@ ThumbInstruction ThumbDecoder::decode(uint16_t rawOpcode)
     return inst;
   }
 
+  // Detect format 16: Conditional branch
+  // Top 4 bits are 1101
+  if ((rawOpcode >> 12) == 0xD) {
+    inst.format = 16;
+    inst.cond = (rawOpcode >> 8) & 0xF;
+
+    int8_t offset = rawOpcode & 0xFF; // Bits 0-7 for signed offset
+    inst.branchOffset = static_cast<int32_t>(offset);
+    return inst;
+  }
+
   // Catch all for unimplemented formats
   inst.format = 99;
   return inst;

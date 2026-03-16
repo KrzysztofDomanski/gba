@@ -17,6 +17,10 @@ namespace gba
     uint8_t rn;        // Second source register (if applicable)
     uint8_t immediate; // Immediate value (if applicable)
     uint8_t opcode;    // Sub opcode for math ops (if applicable)
+
+    // Branching
+    uint8_t cond;
+    uint32_t branchOffset;
   };
 
   class ThumbDecoder {

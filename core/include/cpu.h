@@ -70,5 +70,6 @@ namespace gba
     uint32_t fetchedOpcode = 0;
     Instruction decodedInstruction;
     ThumbInstruction decodedThumbInstruction;
+    bool pipelineFlushed = false;
   };
 } // namespace gba
