@@ -88,7 +88,35 @@ void CPU::execute()
         if (ThumbLSU::executeFormat14(decodedThumbInstruction, registers, bus)) {
           flushPipeline(); // PC was modified, flush the pipeline to fetch the correct instructions
         }
-        break;  
+        break;
+
+      case 19:
+        if (!decodedThumbInstruction.isBlSuffix) {
+          // Prefix
+          // Sign-extend the 11-bit offset to 32 bits
+          int32_t offset = decodedThumbInstruction.linkOffset;
+          if (offset & 0x400) { // If the 11th bit is 1, it's negative
+            offset |= 0xFFFFF800;
+          }
+
+          // Shift left by 12, add to PC, and store in LR (R14)
+          // Note: The PC is currently 4 bytes ahead of this executing instruction
+          registers[14] = registers[15] + (offset << 12);
+        } else {
+          // Suffix
+          // The final target is the partial math in LR + (lower offset shifted left by 1)
+          uint32_t targetAddress = registers[14] + (decodedThumbInstruction.linkOffset << 1);
+
+          // The return address is the instruction immediately following this suffix
+          // Because PC is currently 4 bytes ahead of the suffix, we subtract 2
+          // THUMB specification requires bit 0 to be set to 1 to indicate THUMB state
+          registers[14] = (registers[15] - 2) | 1;
+
+          // Jump to the target address
+          registers[15] = targetAddress;
+          flushPipeline();
+        }
+        break;
 
       case 16:
         if (checkCondition(decodedThumbInstruction.cond)) {

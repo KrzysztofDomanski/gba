@@ -30,6 +30,10 @@ namespace gba
     // Push/Pop
     uint8_t registerList; // Bitmask of registers for push/pop (Bits 0-7)
     bool rBit;            // Register list bit (Bit 8) for push/pop
+
+    // Branch with Link
+    uint16_t linkOffset; // Offset for BL instruction (11 bits)
+    bool isBlSuffix;     // 0 = Prefix (Upper 11 bits), 1 = Suffix (Lower 11 bits)
   };
 
   class ThumbDecoder {

@@ -37,6 +37,14 @@ ThumbInstruction ThumbDecoder::decode(uint16_t rawOpcode)
     return inst;
   }
 
+  // Detect Format 19: Branch with Link (BL)
+  if ((rawOpcode >> 12) == 0xF) {
+    inst.format = 19;
+    inst.isBlSuffix = (rawOpcode >> 11) & 0x1; // Bit 11 distinguishes prefix (0) from suffix (1)
+    inst.linkOffset = rawOpcode & 0x7FF;       // Bits 0-10 for the link offset
+    return inst;
+  }
+
   // Detect format 16: Conditional branch
   // Top 4 bits are 1101
   if ((rawOpcode >> 12) == 0xD) {
