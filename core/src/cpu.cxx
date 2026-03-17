@@ -80,6 +80,48 @@ void CPU::execute()
         ThumbALU::executeFormat3(decodedThumbInstruction, registers, currentProgramStatusRegister);
         break;
 
+      case 5: {
+        uint8_t realRd = decodedThumbInstruction.rd + (decodedThumbInstruction.h1 ? 8 : 0);
+        uint8_t realRs = decodedThumbInstruction.rs + (decodedThumbInstruction.h2 ? 8 : 0);
+
+        uint32_t rsVal = registers[realRs];
+        switch (decodedThumbInstruction.opcode) {
+          case 0: // ADD
+            registers[realRd] = registers[realRd] + rsVal;
+            if (realRd == 15) {
+              // If Rd is PC, we need to flush the pipeline to fetch the correct instructions
+              flushPipeline();
+            }
+            break;
+          case 1: // CMP
+            // CMP Updates flags but discards results, I'll implement it when I
+            // later refactor the alu
+            break;
+          case 2: // MOV
+            registers[realRd] = rsVal;
+            if (realRd == 15) {
+              // If Rd is PC, we need to flush the pipeline to fetch the correct instructions
+              flushPipeline();
+            }
+            break;
+          case 3: // BX
+            uint32_t targetAddress = rsVal;
+            if (targetAddress & 1) {
+              // Bit 5 set = THUMB state
+              currentProgramStatusRegister |= 0x20; // Set bit 5 to switch to THUMB state
+            } else {
+              // Bit 5 clear = ARM state
+              currentProgramStatusRegister &= ~0x20; // Clear bit 5 to switch to ARM state
+            }
+
+            // Clear the lowest bit to get the actual address
+            registers[15] = targetAddress & ~1;
+            flushPipeline();
+            break;
+        }
+        break;
+      }
+
       case 9:
         ThumbLSU::executeFormat9(decodedThumbInstruction, registers, bus);
         break;

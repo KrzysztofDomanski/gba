@@ -16,6 +16,17 @@ ThumbInstruction ThumbDecoder::decode(uint16_t rawOpcode)
     return inst;
   }
 
+  // Detect Format 5 where the top 6 bits are 010001 (0x11)
+  if ((rawOpcode >> 10) == 0x11) {
+    inst.format = 5;
+    inst.opcode = (rawOpcode >> 8) & 0x3; // 0=ADD, 1=CMP, 2=MOV, 3=BX
+    inst.h1 = (rawOpcode >> 7) & 0x1;     // Bit 7 is H1
+    inst.h2 = (rawOpcode >> 6) & 0x1;     // Bit 6 is H2
+    inst.rs = (rawOpcode >> 3) & 0x7;     // Bits 3-5 for source register
+    inst.rd = rawOpcode & 0x7;            // Bits 0-2 for destination register
+    return inst;
+  }
+
   // Detect Format 9 where the top 3 bits are 011
   if ((rawOpcode >> 13) == 0b011) {
     inst.format = 9;

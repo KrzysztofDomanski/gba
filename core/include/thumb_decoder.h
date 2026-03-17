@@ -34,6 +34,10 @@ namespace gba
     // Branch with Link
     uint16_t linkOffset; // Offset for BL instruction (11 bits)
     bool isBlSuffix;     // 0 = Prefix (Upper 11 bits), 1 = Suffix (Lower 11 bits)
+
+    // Hi-register / BX
+    bool h1; // If 1 Rd becomes Rd + 8 (i.e., R8-R15)
+    bool h2; // If 1 Rs becomes Rs + 8 (i.e., R8-R15)
   };
 
   class ThumbDecoder {

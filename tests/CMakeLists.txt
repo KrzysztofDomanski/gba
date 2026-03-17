@@ -24,6 +24,7 @@ add_executable(gba_tests
   test_thumb_alu.cxx
   test_thumb_bl.cxx
   test_thumb_branch.cxx
+  test_thumb_bx.cxx
   test_thumb_decode.cxx
   test_thumb_lsu.cxx
   test_thumb_stack.cxx
