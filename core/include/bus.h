@@ -45,6 +45,9 @@ namespace gba
     // Video RAM (VRAM) - 96 KB (0x06000000 - 0x06017FFF)
     std::array<uint8_t, 96 * 1024> vram{};
 
+    // I/O Registers - 1 KB (0x40000000 - 0x400003FF)
+    std::array<uint8_t, 1024> ioRam{};
+
     Cartridge cartridge;
   };
 } // namespace gba

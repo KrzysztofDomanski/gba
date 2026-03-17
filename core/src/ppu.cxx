@@ -13,9 +13,21 @@ const uint32_t* PPU::getFrameBuffer() const
 
 void PPU::renderFrame()
 {
-  // TODO A real GBA checks memory address 0x04000000 (DISPCNT) to see what mode it's in
-  // For now we assume mode 3 so that we can see SOMETHING on the screen
-  renderMode3();
+  // Read DISPCNT register to determine the current mode
+  uint16_t dispcnt = bus.read16(0x04000000);
+
+  // Bits 0-2 determine the modes
+  uint8_t mode = dispcnt & 0x7;
+
+  // Extract Background 2 enable bit (Bit 10)
+  bool bg2Enabled = (dispcnt >> 10) & 0x1;
+
+  if (mode == 3 && bg2Enabled) {
+    renderMode3();
+  } else {
+    // For now, if we're not in mode 3 with BG2 enabled, just clear the screen to black
+    std::fill(frameBuffer.begin(), frameBuffer.end(), 0xFF000000);
+  }
 }
 
 void PPU::renderMode3()

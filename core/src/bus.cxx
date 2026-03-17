@@ -21,6 +21,9 @@ uint8_t Bus::read8(uint32_t address) const
     case 0x03:                        // IWRAM
       return iwram[address & 0x7FFF]; // Mask to 32 KB
 
+    case 0x04:
+      return ioRam[address & 0x3FF]; // Mask to 1 KB
+
     case 0x06: { // VRAM
       // The GBA actually allocates 128 KB of address space for VRAM,
       // but only 96 KB of physical memory. The last 32 KB is a mirror of
@@ -63,6 +66,9 @@ void Bus::write8(uint32_t address, uint8_t value)
       break;
     case 0x03:                         // IWRAM
       iwram[address & 0x7FFF] = value; // Mask to 32 KB
+      break;
+    case 0x04: // I/O Registers
+      ioRam[address & 0x3FF] = value;
       break;
     case 0x06: { // VRAM
       uint32_t vramAddress = address & 0x0001FFFF;

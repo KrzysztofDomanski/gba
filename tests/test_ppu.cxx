@@ -13,6 +13,9 @@ TEST_CASE("PPU Mode 3 RGB555 to RGBA Conversion", "[ppu][vram]")
 
   SECTION("Render a single pixel in Mode 3")
   {
+    // Enable Mode 3 with BG2 (bit 10) in DISPCNT register
+    bus.write16(0x04000000, 0x0403);
+
     int targetX = 10;
     int targetY = 5;
 

@@ -16,6 +16,7 @@ add_executable(gba_tests
   test_conditions.cxx
   test_cpu.cxx
   test_halfword.cxx
+  test_io_dispcnt.cxx
   test_loop.cxx
   test_lsu.cxx
   test_main.cxx
